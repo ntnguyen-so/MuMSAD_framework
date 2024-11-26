@@ -37,7 +37,7 @@ def generate_features(path):
 
     :param path: path to the dataset to be converted
     """
-    for default_fc_parameters in ['tsfresh', 'catch22']:# ['minimal', 'efficient']:
+    for default_fc_parameters in ['tsfresh', 'tsfresh_minimal', 'catch22']:
         window_size = int(re.search(r'\d+', path).group())
 
         # Create name of new dataset
@@ -62,48 +62,34 @@ def generate_features(path):
         # index = df.index
 
         # Setup the TSFresh feature extractor (too costly to use any other parameter)
-        if default_fc_parameters == 'minimal':
+        if default_fc_parameters == 'catch22':            
+            fe = Catch22(
+                catch24=True
+            )
+        elif default_fc_parameters == 'tsfresh_minimal':
             fe = TSFreshFeatureExtractor(
                 default_fc_parameters=default_fc_parameters, 
                 show_warnings=False, 
                 n_jobs=-1
             )
-        elif default_fc_parameters == 'catch22':            
-            fe = Catch22(
-                catch24=True
-            )
-        elif default_fc_parameters == 'rocket':            
-            fe = Rocket(
+        elif default_fc_parameters == 'tsfresh':
+            efficient_set = EfficientFCParameters()
+            minimal_set = MinimalFCParameters()            
+            selected_features = list(efficient_set.keys())
+            for feature in list(minimal_set.keys()) + ['mean_abs_change', 'mean_change', 'number_cwt_peaks', 'benford_correlation']:
+                if feature not in selected_features:
+                    selected_features.append(feature)
+
+            features2use = copy.deepcopy(efficient_set)
+            for feature in list(features2use.keys()):
+                if feature not in selected_features:
+                    del features2use[feature]
+
+            fe = TSFreshFeatureExtractor(
+                default_fc_parameters=features2use, 
+                show_warnings=False, 
                 n_jobs=-1
             )
-        elif default_fc_parameters == 'tsfresh':
-            for percentage in [.25]:
-            
-                efficient_set = EfficientFCParameters()
-                minimal_set = MinimalFCParameters()            
-                selected_features = list(efficient_set.keys())
-                selected_features = random.sample(selected_features, int(len(selected_features)*percentage))
-                for feature in list(minimal_set.keys()) + ['mean_abs_change', 'mean_change', 'number_cwt_peaks']:
-                    if feature not in selected_features:
-                        selected_features.append(feature)
-
-                features2use = copy.deepcopy(efficient_set)
-                for feature in list(features2use.keys()):
-                    if feature not in selected_features:
-                        del features2use[feature]
-
-                fe = TSFreshFeatureExtractor(
-                    default_fc_parameters=features2use, 
-                    show_warnings=False, 
-                    n_jobs=-1
-                )
-                # fe = extract_features(data, default_fc_parameters=features2use)
-                # print(fe)
-                
-                new_name = new_name.replace('tsfresh', 'tsfresh'+str(percentage))
-                new_name_label = new_name_label.replace('tsfresh', 'tsfresh'+str(percentage))
-                index_path = index_path.replace('tsfresh', 'tsfresh'+str(percentage))
-                feature_extractor_path = feature_extractor_path.replace('tsfresh', 'tsfresh'+str(percentage))
         
         # Compute features
         # X_transformed = fe.fit_transform(x)
@@ -116,14 +102,6 @@ def generate_features(path):
             pickle.dump(fe, output, pickle.HIGHEST_PROTOCOL)
         with open(os.path.join(path, index_path), 'wb') as output:
             pickle.dump(index, output, pickle.HIGHEST_PROTOCOL)
-        # print(X_transformed.shape)
-
-        # Create new dataframe
-        # X_transformed.index = index
-        # X_transformed = pd.merge(labels, X_transformed, left_index=True, right_index=True)
-        
-        # Save new features
-        # X_transformed.to_csv(os.path.join(path, new_name))
 
 
 if __name__ == "__main__":
