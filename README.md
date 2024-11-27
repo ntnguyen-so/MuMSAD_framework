@@ -1,31 +1,25 @@
-<p align="center">
-<img width="150" src="./assets/figures/MSAD.png"/> thanh: image to the pieline
-</p>
-
 <h1 align="center">
-<h2 align="center">Interpretable Multivariate Anomaly Detector Selection for Automatic Marine Data Quality Control</h2>
+<h2 align="center">Interpretable Multivariate Anomaly Detector Selection </br>for Automatic Marine Data Quality Control</h2>
 
-<div align="center">
-<p>
-<img alt="GitHub" src="https://img.shields.io/github/license/boniolp/MSAD"> <img alt="GitHub issues" src="https://img.shields.io/github/issues/boniolp/MSAD">
-</p>
-</div>
+MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
-This work proposes a pipeline for automatically selecting of ten interpretable multivariate anomaly detectors, called MuMSAD, as illustrated below. 
 ![Pipeline](./assets/pipeline.PNG)
 
-The framework can be used in a wide range of applications, especially in root cause analysis. We have demonstrated the usefulness and practicability of MuMSAD in two real-world applications, requested by many of industrial and research collaborators.
-- Automatic multi-parameter marine data quality control (see the figure below for the general overview of how anomalies identified in multi-parameter marine time series and related root cause analysis)
+The framework can be used in a wide range of applications, especially in root cause analysis. In our work, we have demonstrated the usefulness and practicability of MuMSAD in two real-world applications, requested by many of industrial and research collaborators.
+- Automatic multi-parameter marine data quality control. The figure below demonstrates the idea of the work and related root cause analysis.
 - Automatic identification of malfunctioning sensors in Remotely Operated Vehicles.
 
 ![Motivation](./assets/motivation.PNG)
 
+Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
+
 ## Installation
 
-To install MSAD from source, you will need the following tools:
+To install and use MuMSAD from source, you will need the following tools:
 
 - `git`
 - `conda` (anaconda or miniconda)
+- `docker`
 
 #### Steps for installation
 
@@ -50,16 +44,20 @@ If you do not wish to create the `conda` environment, you can install only the d
 ```
 pip install -r requirements.txt
 ```
+**4.** Build docker images of interpretable anomaly detectors (source files are under `interpretable_anomaly_detectors`). 
+```bash
+cd interpretable_anomaly_detectors
+./setup.sh
+cd ..
+```
+Disclaimer: The credit for base images goes to [TimeEval-algorithms](https://github.com/TimeEval/TimeEval-algorithms) :clap:
 
-**4.** :clap: Installation complete! :clap:
+**5.** :clap: Installation complete! :clap:
 
-## Usage
-
-Below, you will find a step-by-step guide on how to use our work. This includes the commands required to run the scripts along with a small explanation of what they do and the parameters they use. The values of the parameters in the scripts are just examples, and you can experiment with different values.
 
 #### Compute Oracle
 
-The Oracle (shown in white in the results figure at the end) is a hypothetical model that simulates the accuracy of a model on a given benchmark and evaluates its anomaly detection ability. You can simulate Oracle with different accuracy values, ranging from 1 (always selecting the best detector for a time series) to zero (always selecting a wrong detector). Additionally, you can simulate Oracle with different modes of randomness, namely:
+The Oracle is a hypothetical model that simulates the accuracy of a model on a given benchmark and evaluates its anomaly detection ability. You can simulate Oracle with different accuracy values, ranging from 1 (always selecting the best detector for a time series) to zero (always selecting a wrong detector). Additionally, you can simulate Oracle with different modes of randomness, namely:
 
 1. **true**: When wrong, randomly select another detector.
 2. **lucky**: When wrong, always select the second best detector (upper bound).
@@ -69,14 +67,14 @@ The Oracle (shown in white in the results figure at the end) is a hypothetical m
 To compute Oracle, run the following command:
 
 ```bash
-python3 run_oracle.py --path=data/TSB/metrics/ --acc=1 --randomness=true
+python3 run_oracle.py --path=data/<your dataset>/metrics/ --acc=1 --randomness=true
 ```
 
 - path: Path to metrics (the results will be saved here).
 - acc: The accuracy that you want to simulate (a float between 0 and 1).
 - randomness: The randomness mode that you want to simulate (see possible modes above).
 
-> The results are saved in _/MSAD/data/TSB/metrics/TRUE_ORACLE-100/_ (the name of the last folder should change depending on the parameters).
+> The results are saved in _/MuMSAD_framework/data/<your dataset>/metrics/TRUE_ORACLE-100/_ (the name of the last folder should change depending on the parameters).
 
 #### Compute Averaging Ensemble
 
