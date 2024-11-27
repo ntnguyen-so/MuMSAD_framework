@@ -3,13 +3,18 @@
 
 MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
-![Pipeline](./assets/pipeline.PNG)
+<div align="center">
+  <img src="./assets/pipeline.PNG" alt="Pipeline">
+</div>
+
 
 The framework can be used in a wide range of applications, especially in root cause analysis. In our work, we have demonstrated the usefulness and practicability of MuMSAD in two real-world applications, requested by many of industrial and research collaborators.
-- Automatic multi-parameter marine data quality control. The figure below demonstrates the idea of the work and related root cause analysis.
-- Automatic identification of malfunctioning sensors in Remotely Operated Vehicles.
+- Automatic multi-parameter marine data quality control. The figure below demonstrates the overview idea of the application.
+- Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborator.
 
-![Motivation](./assets/motivation.PNG)
+<div align="center">
+  <img src="./assets/motivation.PNG" alt="Motivation">
+</div>
 
 Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
 
@@ -54,6 +59,7 @@ Disclaimer: The credit for base images goes to [TimeEval-algorithms](https://git
 
 **5.** :clap: Installation complete! :clap:
 
+## Usage
 
 #### Compute Oracle
 
@@ -71,12 +77,13 @@ python3 run_oracle.py --path=data/<your dataset>/metrics/ --acc=1 --randomness=t
 ```
 
 - path: Path to metrics (the results will be saved here).
-- Note: Replace <your dataset> with the name of the folder containing your dataset. For example, if your dataset is stored in the dataset_1 folder, the command would look like this:
-> python3 run_oracle.py --path=data/dataset_1/metrics/ --acc=1 --randomness=true
+- Note: Replace <your dataset> with the name of the folder containing your dataset. For example, if your dataset is stored in the dataset folder, the command would look like this:
+> python3 run_oracle.py --path=data/dataset/metrics/ --acc=1 --randomness=true
+Hereafter, we will use dataset as an example name for the dataset in use.
 - acc: The accuracy that you want to simulate (a float between 0 and 1).
 - randomness: The randomness mode that you want to simulate (see possible modes above).
 
-> The results are saved in _/MuMSAD_framework/data/dataset_1/metrics/TRUE_ORACLE-100/_ (the name of the last folder and dataset name should change depending on the parameters).
+> The results are saved in _/MuMSAD_framework/data/dataset/metrics/TRUE_ORACLE-100/_ (the name of the last folder and dataset name should change depending on the parameters).
 
 #### Compute Averaging Ensemble
 
@@ -98,7 +105,7 @@ Our models have been implemented to work with fixed-size inputs. Thus, before ru
 To produce a windowed dataset, run the following command:
 
 ```bash
-python3 create_windows_dataset.py --save_dir=data/ --path=data/<your dataset>/data/ --metric_path=data/<your dataset>/metrics/ --window_size=512 --metric=<the metric you specified> --data_normalization=False
+python3 create_windows_dataset.py --save_dir=data/ --path=data/dataset/data/ --metric_path=data/dataset/metrics/ --window_size=512 --metric=AUC-PR --data_normalization=False
 ```
 
 - save_dir: Path to save the dataset.
@@ -115,7 +122,7 @@ The feature-based methods require a set of features to be computed first, turnin
 To compute the set of features for a segmented dataset, run the following command:
 
 ```bash
-python3 generate_features.py --feature=catch22 --path=data/<your dataset>_<window size>/ 
+python3 generate_features.py --feature=catch22 --path=data/dataset_512/ 
 ```
 
 - feature: feature extractors to be used (catch22, TSFresh, TS_minimal - only 9 feautres are extracted without emphasis on multivariate time series)
@@ -127,7 +134,7 @@ Note: you can check out the script stored under `reproducibility_guide/genererat
 To train a model, run the following command:
 
 ```bash
-python3 train_deep_model.py --path=data/<your dataset>_<window size>/ --split=0.7 --file=experiments/supervised_splits/split_<your dataset>_<window size>.csv --model=resnet --params=models/configuration/resnet_default.json --batch=256 --epochs=10 --eval-true
+python3 train_deep_model.py --path=data/dataset_512/ --split=0.7 --file=experiments/supervised_splits/split_dataset_512.csv --model=resnet --params=models/configuration/resnet_default.json --batch=256 --epochs=10 --eval-true
 ```
 
 - path: Path to the dataset to use.
@@ -150,7 +157,7 @@ python3 train_deep_model.py --path=data/<your dataset>_<window size>/ --split=0.
 To evaluate a model on a folder of CSV files, run the following command:
 
 ```bash
-python3 eval_deep_model.py --data=data/<your dataset>_<window size>/MGAB/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/
+python3 eval_deep_model.py --data=data/dataset_512/MGAB/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/
 ```
 
 - data: Path to the time series data to predict.
@@ -164,7 +171,7 @@ python3 eval_deep_model.py --data=data/<your dataset>_<window size>/MGAB/ --mode
 To reproduce our specific results, run the following command:
 
 ```bash
-python3 eval_deep_model.py --data=data/<your dataset>_<window size>/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/ --file=experiments/supervised_splits/split_<your dataset>_<window size>.csv
+python3 eval_deep_model.py --data=data/dataset_512/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/ --file=experiments/supervised_splits/split_dataset_512.csv
 ```
 
 - file: Path to a file that contains a specific split (to reproduce our results).
@@ -185,7 +192,7 @@ List of available classifiers:
 To train any of these classifiers, run the following command:
 
 ```bash
-python3 train_feature_based.py --path=data/TSB_512/TSFRESH_TSB_512.csv --classifier=knn --split_per=0.7 --file=experiments/unsupervised_splits/unsupervised_testsize_1_split_0.csv --eval-true --path_save=results/weights/
+python3 train_feature_based.py --path=data/dataset_512/TSFRESH_dataset_512.csv --classifier=knn --split_per=0.7 --file=experiments/unsupervised_splits/unsupervised_testsize_1_split_0.csv --eval-true --path_save=results/weights/
 ```
 
 - path: Path to the dataset to use.
@@ -199,7 +206,7 @@ python3 train_feature_based.py --path=data/TSB_512/TSFRESH_TSB_512.csv --classif
 To evaluate a classifier, run the following command:
 
 ```bash
-python3 eval_feature_based.py --data=data/TSB_512/TSFRESH_TSB_512.csv --model=knn --model_path=results/weights/knn_512/ --path_save=results/raw_predictions/
+python3 eval_feature_based.py --data=data/dataset_512/TSFRESH_dataset_512.csv --model=knn --model_path=results/weights/knn_512/ --path_save=results/raw_predictions/
 ```
 
 - data: Path to the time series data to predict.
