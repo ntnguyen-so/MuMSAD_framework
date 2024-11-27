@@ -61,45 +61,8 @@ Disclaimer: The credit for base images goes to [TimeEval-algorithms](https://git
 
 ## Usage
 
-#### Compute Oracle
+### Data Preparation
 
-The Oracle is a hypothetical model that simulates the accuracy of a model on a given benchmark and evaluates its anomaly detection ability. You can simulate Oracle with different accuracy values, ranging from 1 (always selecting the best detector for a time series) to zero (always selecting a wrong detector). Additionally, you can simulate Oracle with different modes of randomness, namely:
-
-1. **true**: When wrong, randomly select another detector.
-2. **lucky**: When wrong, always select the second best detector (upper bound).
-3. **unlucky**: When wrong, always select the worst detector (lower bound).
-4. **best-k**: When wrong, always select the k-th best detector (e.g., best-2 is lucky).
-
-To compute Oracle, run the following command:
-
-```bash
-python3 run_oracle.py --path=data/<your dataset>/metrics/ --acc=1 --randomness=true
-```
-
-- path: Path to metrics (the results will be saved here).
-- Note: Replace <your dataset> with the name of the folder containing your dataset. For example, if your dataset is stored in the dataset folder, the command would look like this:
-> python3 run_oracle.py --path=data/dataset/metrics/ --acc=1 --randomness=true
-Hereafter, we will use dataset as an example name for the dataset in use.
-- acc: The accuracy that you want to simulate (a float between 0 and 1).
-- randomness: The randomness mode that you want to simulate (see possible modes above).
-
-> The results are saved in _/MuMSAD_framework/data/dataset/metrics/TRUE_ORACLE-100/_ (the name of the last folder and dataset name should change depending on the parameters).
-
-#### Compute Averaging Ensemble
-
-The Averaging Ensemble, or Avg Ens (in orange in the results figure at the end), is used to ensemble the anomaly scores produced by all the detectors, by computing their average. Depending on the metric you specified in `utils/config.py`, the accuracy/interpretablity is calculated accordingly.
-
-To compute Avg Ens, run the following command:
-
-```bash
-python3 run_avg_ens.py --n_jobs=16
-```
-
-- n_jobs: The number of threads to use for parallel computation (specify an appropriate value).
-
-#### Data Preprocessing
-
-##### Data preparation for MuMSAD
 Our models have been implemented to work with fixed-size inputs. Thus, before running any models, we first divide every time series in the used dataset into windows. Note that you can add your own time series here and divide them into windows, but make sure to follow the same format.
 
 To produce a windowed dataset, run the following command:
@@ -129,7 +92,9 @@ python3 generate_features.py --feature=catch22 --path=data/dataset_512/
 - path: Path to the dataset for computing the features (the dataset should be segmented first into windows; see the command above). The resulting dataset is saved in the same directory (**MANDATORY**).
 Note: you can check out the script stored under `reproducibility_guide/genererate_features.sh` for examples of how to prepare features for feature-based model selectors of MuMSAD.
 
-#### Deep Learning Architectures
+## Supported Model Selectors
+
+### Deep Learning 
 
 To train a model, run the following command:
 
@@ -176,7 +141,7 @@ python3 eval_deep_model.py --data=data/dataset_512/ --model=convnet --model_path
 
 - file: Path to a file that contains a specific split (to reproduce our results).
 
-#### Feature-Based
+### Feature-Based
 
 List of available classifiers:
 
@@ -215,4 +180,44 @@ python3 eval_feature_based.py --data=data/dataset_512/TSFRESH_dataset_512.csv --
 - path_save: Path to save the results.
 
 > Note: To reproduce our results run the training script with the 'eval-true' option and the 'file' argument set to the specific splits we used (found in the _/MuMSAD_framework/experiments/\*\_splits_ directories).
+
+###  Oracle
+
+The Oracle is a hypothetical model that simulates the accuracy of a model on a given benchmark and evaluates its anomaly detection ability. You can simulate Oracle with different accuracy values, ranging from 1 (always selecting the best detector for a time series) to zero (always selecting a wrong detector). Additionally, you can simulate Oracle with different modes of randomness, namely:
+
+1. **true**: When wrong, randomly select another detector.
+2. **lucky**: When wrong, always select the second best detector (upper bound).
+3. **unlucky**: When wrong, always select the worst detector (lower bound).
+4. **best-k**: When wrong, always select the k-th best detector (e.g., best-2 is lucky).
+
+To compute Oracle, run the following command:
+
+```bash
+python3 run_oracle.py --path=data/<your dataset>/metrics/ --acc=1 --randomness=true
+```
+
+- path: Path to metrics (the results will be saved here).
+- Note: Replace <your dataset> with the name of the folder containing your dataset. For example, if your dataset is stored in the dataset folder, the command would look like this:
+> python3 run_oracle.py --path=data/dataset/metrics/ --acc=1 --randomness=true
+Hereafter, we will use dataset as an example name for the dataset in use.
+- acc: The accuracy that you want to simulate (a float between 0 and 1).
+- randomness: The randomness mode that you want to simulate (see possible modes above).
+
+> The results are saved in _/MuMSAD_framework/data/dataset/metrics/TRUE_ORACLE-100/_ (the name of the last folder and dataset name should change depending on the parameters).
+
+### Averaging Ensemble
+
+The Averaging Ensemble, or Avg Ens (in orange in the results figure at the end), is used to ensemble the anomaly scores produced by all the detectors, by computing their average. Depending on the metric you specified in `utils/config.py`, the accuracy/interpretablity is calculated accordingly.
+
+To compute Avg Ens, run the following command:
+
+```bash
+python3 run_avg_ens.py --n_jobs=16
+```
+
+- n_jobs: The number of threads to use for parallel computation (specify an appropriate value).
+
+
+
+
 
