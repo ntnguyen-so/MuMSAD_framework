@@ -1,5 +1,5 @@
 <p align="center">
-<img width="150" src="./assets/headline.PNG"/>
+<img src="./assets/headline.PNG" style="width: 30%;"/>
 </p>
 
 <h1 align="center">
