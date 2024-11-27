@@ -4,7 +4,7 @@
 MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
 <div align="center">
-  <img src="./assets/pipeline.PNG" alt="Pipeline">
+  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 30%;">
 </div>
 
 
@@ -13,7 +13,7 @@ The framework can be used in a wide range of applications, especially in root ca
 - Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborator.
 
 <div align="center">
-  <img src="./assets/motivation.PNG" alt="Motivation">
+  <img src="./assets/motivation.PNG" alt="Motivation" style="width: 30%;">
 </div>
 
 Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
@@ -59,9 +59,7 @@ Disclaimer: The credit for base images goes to [TimeEval-algorithms](https://git
 
 **5.** :clap: Installation complete! :clap:
 
-## Usage
-
-### Data Preparation
+## Data Preparation
 
 Our models have been implemented to work with fixed-size inputs. Thus, before running any models, we first divide every time series in the used dataset into windows. Note that you can add your own time series here and divide them into windows, but make sure to follow the same format.
 
