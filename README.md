@@ -1,3 +1,7 @@
+<p align="center">
+<img width="150" src="./assets/headline.PNG"/>
+</p>
+
 <h1 align="center">
 <h2 align="center">Interpretable Multivariate Anomaly Detector Selection </br>for Automatic Marine Data Quality Control</h2>
 
