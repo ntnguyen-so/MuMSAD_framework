@@ -4,7 +4,7 @@
 MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
 <div align="center">
-  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 30%;">
+  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 50%;">
 </div>
 
 
@@ -17,6 +17,7 @@ The framework can be used in a wide range of applications, especially in root ca
 </div>
 
 Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
+MuMSAD is an extension of [MSAD](https://github.com/boniolp/MSAD), which is orignally designed for automatic selection of univariate anomaly detectors. MuMSAD is fully compatible to features supported in the original framework.
 
 ## Installation
 
@@ -55,9 +56,9 @@ cd interpretable_anomaly_detectors
 ./setup.sh
 cd ..
 ```
-Disclaimer: The credit for base images goes to [TimeEval-algorithms](https://github.com/TimeEval/TimeEval-algorithms) :clap:
+The credit for base images goes to [TimeEval-algorithms](https://github.com/TimeEval/TimeEval-algorithms).
 
-**5.** :clap: Installation complete! :clap:
+**5.** Installation complete!
 
 ## Data Preparation
 
@@ -74,7 +75,7 @@ python3 create_windows_dataset.py --save_dir=data/ --path=data/dataset/data/ --m
 - metric_path: Path to the metrics of the dataset provided (to produce the labels).
 - window_size: Window size (if the window size is larger than the time series' length, that time series is skipped).
 - metric: Metric to use for producing the labels. The following metrics are supported: AUC-PR, VUS-PR, AUC-ROC, VUS-ROC, HitRate@K, and a customized metric shown Equation 4 in the paper.
-- data_normalization: Whether you want to normalize the data or not (True or False). In the paper, we tested deep learning model selectors with normalized data. For feature-based selectors, we tested with unnormalized and normalized data.
+- data_normalization: Whether you want to normalize the data or not (True or False). In the work, we tested deep learning model selectors with normalized data. For feature-based selectors, we tested with unnormalized and normalized data.
 Note: you can check out the script stored under `reproducibility_guide/data_preparation.sh` for examples of how to prepare data for MuMSAD.
 
 ### Extracting features
@@ -120,7 +121,7 @@ python3 train_deep_model.py --path=data/dataset_512/ --split=0.7 --file=experime
 To evaluate a model on a folder of CSV files, run the following command:
 
 ```bash
-python3 eval_deep_model.py --data=data/dataset_512/MGAB/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/
+python3 eval_deep_model.py --data=data/dataset_512/MGAB/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30011024_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/
 ```
 
 - data: Path to the time series data to predict.
@@ -134,7 +135,7 @@ python3 eval_deep_model.py --data=data/dataset_512/MGAB/ --model=convnet --model
 To reproduce our specific results, run the following command:
 
 ```bash
-python3 eval_deep_model.py --data=data/dataset_512/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30012023_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/ --file=experiments/supervised_splits/split_dataset_512.csv
+python3 eval_deep_model.py --data=data/dataset_512/ --model=convnet --model_path=results/weights/supervised/convnet_default_512/model_30011024_173428 --params=models/configuration/convnet_default.json --path_save=results/raw_predictions/ --file=experiments/supervised_splits/split_dataset_512.csv
 ```
 
 - file: Path to a file that contains a specific split (to reproduce our results).
