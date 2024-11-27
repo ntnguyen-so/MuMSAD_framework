@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/headline.PNG" style="width: 30%;"/>
+<img src="./assets/headline.PNG" style="width: 40%;"/>
 </p>
 
 <h1 align="center">
@@ -8,7 +8,7 @@
 MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
 <div align="center">
-  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 50%;">
+  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 70%;">
 </div>
 
 
@@ -17,7 +17,7 @@ The framework can be used in a wide range of applications, especially in root ca
 - Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborator.
 
 <div align="center">
-  <img src="./assets/motivation.PNG" alt="Motivation" style="width: 30%;">
+  <img src="./assets/motivation.PNG" alt="Motivation" style="width: 50%;">
 </div>
 
 Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
