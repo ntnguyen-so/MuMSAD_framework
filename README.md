@@ -57,7 +57,7 @@ pip install -r requirements.txt
 **4.** Build docker images of interpretable anomaly detectors (source files are under `interpretable_anomaly_detectors`). 
 ```bash
 cd interpretable_anomaly_detectors
-./setup.sh
+bash setup.sh
 cd ..
 ```
 The credit for base images goes to [TimeEval-algorithms](https://github.com/TimeEval/TimeEval-algorithms).
