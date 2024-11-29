@@ -196,7 +196,7 @@ if __name__ == "__main__":
     parser.add_argument('-mp', '--metric_path', type=str, help='path to the metrics of the dataset given', default=metrics_path)
     parser.add_argument('-w', '--window_size', type=str, help='window size to segment the timeseries to', required=True)
     parser.add_argument('-m', '--metric', type=str, help='metric to use to produce the labels', default='AUC_PR')
-    parser.add_argument('-d', '--data_normalization', action='store_true', help='whether to normalize the data or not')
+    parser.add_argument('-d', '--data_normalization', type=bool, default=False, help='whether to normalize the data or not')
 
     args = parser.parse_args()
 
