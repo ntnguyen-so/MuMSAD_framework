@@ -204,13 +204,10 @@ The Oracle is a hypothetical model that simulates the accuracy of a model on a g
 To compute Oracle, run the following command:
 
 ```bash
-python3 run_oracle.py --path=data/<your dataset>/metrics/ --acc=1 --randomness=true
+python3 run_oracle.py --path=data/dataset/metrics/ --acc=1 --randomness=true
 ```
 
 - path: Path to metrics (the results will be saved here).
-- Note: Replace <your dataset> with the name of the folder containing your dataset. For example, if your dataset is stored in the dataset folder, the command would look like this:
-> python3 run_oracle.py --path=data/dataset/metrics/ --acc=1 --randomness=true
-Hereafter, we will use dataset as an example name for the dataset in use.
 - acc: The accuracy that you want to simulate (a float between 0 and 1).
 - randomness: The randomness mode that you want to simulate (see possible modes above).
 
