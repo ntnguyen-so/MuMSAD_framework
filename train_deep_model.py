@@ -149,7 +149,7 @@ if __name__ == "__main__":
                 read_from_file=args.file,
                 model_name=args.model,
                 model_parameters_file=args.params,
-                batch_size=64, #args.batch,
+                batch_size=args.batch,
                 epochs=args.epochs,
                 eval_model=args.eval_true
         )

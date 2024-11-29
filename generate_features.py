@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: root
-# @file : generate_features
-#
-########################################################################
-
 import numpy as np
 import pandas as pd
 import argparse
@@ -25,6 +14,7 @@ from tsfresh.feature_extraction import EfficientFCParameters, MinimalFCParameter
 from tsfresh.feature_extraction import extract_features
 import random
 import pickle
+from config import *
 
 random.seed(42)
 
@@ -42,24 +32,25 @@ def generate_features(path):
 
         # Create name of new dataset
         dataset_name = [x for x in path.split('/') if str(window_size) in x][0]
-        # new_name = f"TSFRESH_{dataset_name}.csv"
-        new_name = f"TSFRESH_{dataset_name}_{default_fc_parameters}.npy"
-        new_name_label = f"TSFRESH_{dataset_name}_label_{default_fc_parameters}.npy"
-        index_path = f"TSFRESH_{dataset_name}_index_{default_fc_parameters}.pkl"
-        feature_extractor_path = f"TSFRESH_{dataset_name}_FE_{default_fc_parameters}.pkl"
-        print(os.path.join(path, new_name))
-
+        new_name = f"feature_{dataset_name}_{default_fc_parameters}.npy"
+        new_name_label = f"feature_{dataset_name}_label_{default_fc_parameters}.npy"
+        index_path = f"feature_{dataset_name}_index_{default_fc_parameters}.pkl"
+        feature_extractor_path = f"feature_{dataset_name}_FE_{default_fc_parameters}.pkl"
+        
         # Load datasets 
         dataloader = DataLoader(path)
         datasets = dataloader.get_dataset_names()
-        # df = dataloader.load_df(datasets) 
-        data, label, index = dataloader.load_npy(datasets)
-        print(data.shape, label.shape, len(index))
+        if num_dimensions == 1: # univariate time series
+            df = dataloader.load_df(datasets) 
+
+            # Divide df
+            labels = df.pop("label")
+            x = df.to_numpy()[:, np.newaxis]
+            index = df.index
+        else: # multivariate time series
+            data, label, index = dataloader.load_npy(datasets)
         
-        # Divide df
-        # labels = df.pop("label")
-        # x = df.to_numpy()[:, np.newaxis]
-        # index = df.index
+
 
         # Setup the TSFresh feature extractor (too costly to use any other parameter)
         if default_fc_parameters == 'catch22':            
@@ -92,25 +83,36 @@ def generate_features(path):
             )
         
         # Compute features
-        # X_transformed = fe.fit_transform(x)
-        X_transformed = fe.fit_transform(data)
-        np.save(os.path.join(path, new_name), X_transformed)
-        np.save(os.path.join(path, new_name_label), label)
+        if num_dimensions == 1:            	
+            X_transformed = fe.fit_transform(x)
 
-        print('Done, saved to', os.path.join(path, new_name_label))
-        with open(os.path.join(path, feature_extractor_path), 'wb') as output:
-            pickle.dump(fe, output, pickle.HIGHEST_PROTOCOL)
-        with open(os.path.join(path, index_path), 'wb') as output:
-            pickle.dump(index, output, pickle.HIGHEST_PROTOCOL)
+            # Create new dataframe
+            X_transformed.index = index
+            X_transformed = pd.merge(labels, X_transformed, left_index=True, right_index=True)
+            
+            # Save new features
+            X_transformed.to_csv(os.path.join(path, new_name))
+        else:
+            X_transformed = fe.fit_transform(data)
+            np.save(os.path.join(path, new_name), X_transformed)
+            np.save(os.path.join(path, new_name_label), label)
+
+            print('Done, saved to', os.path.join(path, new_name_label))
+            with open(os.path.join(path, feature_extractor_path), 'wb') as output:
+                pickle.dump(fe, output, pickle.HIGHEST_PROTOCOL)
+            with open(os.path.join(path, index_path), 'wb') as output:
+                pickle.dump(index, output, pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog='generate_features',
-        description='Transform a dataset of time series (of equal length) to tabular data\
-        with TSFresh'
+        description='Transform a dataset of time series (of equal length) to tabular data with a specified feature extractor'
     )
     parser.add_argument('-p', '--path', type=str, help='path to the dataset to use')
+    parser.add_argument('-f', '--feature', type=str, choices=['catch22', 'tsfresh', 'tsfresh_minimal'],
+                                help=("a feature extractor to be used (choose from: catch22, tsfresh, tsfresh_minimal);\n"
+                                      "Note: tsfresh_minimal may not extract useful features for multivariate time series"))
     
     args = parser.parse_args()
     generate_features(

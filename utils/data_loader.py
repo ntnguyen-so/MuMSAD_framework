@@ -195,12 +195,9 @@ class DataLoader:
             if curr_data.ndim != 2:
                 raise ValueError('did not expect this shape of data: \'{}\', {}'.format(fname, curr_data.shape))
 
-            # Skip files with no anomalies
-            if True:# not np.all(curr_data[0, 1] == curr_data[:, 1]):
-                curr_data[:, :-1] = (curr_data[:, :-1] - self.ret_min_vals) / (self.ret_max_vals - self.ret_min_vals)
-                pca = PCA(n_components=1)#, kernel='rbf')
-                x.append(np.mean(curr_data[:, :-1]))
-                y.append(curr_data[:, -1])
-                fnames.append(fname)
+            curr_data[:, :-1] = (curr_data[:, :-1] - self.ret_min_vals) / (self.ret_max_vals - self.ret_min_vals)
+            x.append(np.mean(curr_data[:, :-1]))
+            y.append(curr_data[:, -1])
+            fnames.append(fname)
 
         return x, y, fnames

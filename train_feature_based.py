@@ -1,15 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: root
-# @file : train_feature_based
-#
-########################################################################
-
-
 import argparse
 import os
 from time import perf_counter
@@ -143,19 +131,6 @@ def train_feature_based(data_path, classifier_name, split_per=0.7, seed=None, re
 
         train_indices = retrieve_indices(train_set, indices)
         val_indices = retrieve_indices(val_set, indices)
-    
-    if False:
-        # split data for train and test
-        label = label.flatten()
-        indices = np.arange(len(label))
-        train_indices, val_indices = train_test_split(indices, test_size=1-split_per, stratify=label, random_state=42)
-        
-        # Verify the distribution in each set
-        unique, train_counts = np.unique(label[train_indices], return_counts=True)
-        print("Train set distribution:", dict(zip(unique, train_counts)))
-
-        unique, val_counts = np.unique(label[val_indices], return_counts=True)
-        print("Validation set distribution:", dict(zip(unique, val_counts)))
     
     data_len = len(data)
     X_train, X_val = data[train_indices], data[val_indices] # data[:int(data_len * split_per)], data[int(data_len * split_per):]
