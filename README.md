@@ -97,6 +97,14 @@ Note: you can check out the script stored under `reproducibility_guide/genererat
 
 ## Supported Model Selectors
 
+There are 4 different types of model selectors you can use in the framework:
+- Deep learning
+- Feature-based
+- Oracle (theoretical)
+- Average Ensembling
+
+Below we outline how to use them.
+
 ### Deep Learning 
 
 To train a model, run the following command:
@@ -146,7 +154,7 @@ python3 eval_deep_model.py --data=data/dataset_512/ --model=convnet --model_path
 
 ### Feature-Based
 
-List of available classifiers:
+To use feature-based model selectors, it is a prerequisite that feature extraction has been executed (see Section **Extracting features**). You can use the following classifiers:
 
 - **knn**
 - **svc_linear**
