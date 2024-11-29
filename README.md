@@ -78,7 +78,7 @@ python3 create_windows_dataset.py --save_dir=data/ --path=data/dataset/data/ --m
 - path: Path of the dataset to divide into windows.
 - metric_path: Path to the metrics of the dataset provided (to produce the labels).
 - window_size: Window size (if the window size is larger than the time series' length, that time series is skipped).
-- metric: Metric to use for producing the labels. The following metrics are supported: AUC-PR, VUS-PR, AUC-ROC, VUS-ROC, INTERPRETABILITY (hHitRate@K), and AD_ACC (a customized metric shown Equation 4 in the paper). 
+- metric: Metric to use for producing the labels. The following metrics are supported: AUC-PR, VUS-PR, AUC-ROC, VUS-ROC, INTERPRETABILITY (based on HitRate@K), and AD_ACC (a customized metric shown Equation 4 in the paper). 
 - data_normalization: Whether you want to normalize the data or not (True or False). In the work, we tested deep learning model selectors with normalized data. For feature-based selectors, we tested with unnormalized and normalized data.
 Note: you can check out the script stored under `reproducibility_guide/data_preparation.sh` for examples of how to prepare data for MuMSAD.
 
