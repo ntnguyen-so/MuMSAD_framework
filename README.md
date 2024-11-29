@@ -93,6 +93,7 @@ python3 generate_features.py --feature=catch22 --path=data/dataset_512/
 
 - feature: feature extractors to be used (catch22, TSFresh, TS_minimal - only 9 feautres are extracted without emphasis on multivariate time series)
 - path: Path to the dataset for computing the features (the dataset should be segmented first into windows; see the command above). The resulting dataset is saved in the same directory (**MANDATORY**).
+
 Note: you can check out the script stored under `reproducibility_guide/genererate_features.sh` for examples of how to prepare features for feature-based model selectors of MuMSAD.
 
 ## Supported Model Selectors
