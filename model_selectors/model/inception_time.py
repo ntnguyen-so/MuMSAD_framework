@@ -1,21 +1,9 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos & Paul Boniol
-# @source : https://github.com/TheMrGhostman/InceptionTime-Pytorch/blob/master/inception.py
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/model
-# @file : inception_time
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 
 from typing import cast, Union, List
 
-from models.blocks.inception_block import InceptionBlock
+from model_selectors.blocks.inception_block import InceptionBlock
 
 
 class InceptionModel(nn.Module):	

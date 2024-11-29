@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos & Paul Boniol 
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/model
-# @file : convnet
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 

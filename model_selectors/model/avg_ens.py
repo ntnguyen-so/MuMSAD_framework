@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: models
-# @file : avg_ens
-#
-########################################################################
-
 from utils.scores_loader import ScoresLoader
 
 import numpy as np

@@ -1,20 +1,7 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos & Paul Boniol
-# @source : https://github.com/okrasolar/pytorch-timeseries/blob/master/
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/blocks
-# @file : conv_block
-#
-########################################################################
-
-
 import torch
 import torch.nn as nn
 
-from models.layers.conv1d_same_padding import Conv1dSamePadding
+from model_selectors.layers.conv1d_same_padding import Conv1dSamePadding
 
 
 class ConvBlock(nn.Module):

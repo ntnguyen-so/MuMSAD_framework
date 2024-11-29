@@ -3,6 +3,7 @@ import numpy as np
 import math
 import itertools, operator
 import time
+from sklearn.metrics import precision_recall_curve, auc
 # import matplotlib.pyplot as plt
 
 
@@ -428,7 +429,69 @@ class metricor:
             ap_3d.append(AP_range)
 
         
-        return tpr_3d, fpr_3d, prec_3d, window_3d, sum(auc_3d)/len(window_3d), sum(ap_3d)/len(window_3d)
+        return tpr_3d, fpr_3d, prec_3d, window_3d, sum(auc_3d)/len(window_3d), sum(ap_3d)/len(window_3d)        
+    
+    def calc_auc_pr(score, label):
+        precision, recall, _ = precision_recall_curve(label, score)
+        auc_pr = auc(recall, precision)
+        return auc_pr
+        
+    from sklearn.metrics import precision_recall_curve
+    def calc_reverse_fpr(score, label, th):
+        scores = list()
+        for th in np.linspace(0, 1, 1000):    
+            y_pred = np.array(score)
+            y_true = np.array(label)
+            # Convert predicted probabilities to binary predictions based on the threshold
+            y_pred_binary = (y_pred >= th).astype(int)
+        
+            # Calculate True Positives (TP) and False Negatives (FN)
+            TP = np.sum((y_true == 1) & (y_pred_binary == 1))
+            TN = np.sum((y_true == 0) & (y_pred_binary == 0))
+            FN = np.sum((y_true == 1) & (y_pred_binary == 0))
+            FP = np.sum((y_true == 0) & (y_pred_binary == 1))
+        
+            # Calculate False Negative Rate (FNR)
+            fpr = FP / (FP + TN)
+
+            scores.append(1-fpr)
+
+        return np.mean(np.array(scores))
+        
+    from sklearn.metrics import precision_recall_curve
+    def calc_tpr(score, label, th):
+        scores = list()
+        
+        for th in np.linspace(0, 1,       1000):
+            y_pred = np.array(score)
+            y_true = np.array(label)
+            
+            # Convert predicted probabilities to binary predictions based on the threshold
+            y_pred_binary = (y_pred >= th).astype(int)
+        
+            # Calculate True Positives (TP) and False Negatives (FN)
+            TP = np.sum((y_true == 1) & (y_pred_binary == 1))
+            TN = np.sum((y_true == 0) & (y_pred_binary == 0))
+            FN = np.sum((y_true == 1) & (y_pred_binary == 0))
+            FP = np.sum((y_true == 0) & (y_pred_binary == 1))
+        
+            # Calculate False Negative Rate (FNR)
+            tpr = TP / (TP + FN)
+
+            scores.append(tpr)
+        return np.mean(np.array(scores))
+        
+    def calc_acc(score, label, th):
+        if sum(label) > 0 and sum(label) < len(label):
+            acc = calc_auc_pr(score, label)
+        elif sum(label) == len(label):
+            acc = calc_tpr(score, label, th)
+        elif sum(label) == 0:
+            acc = calc_reverse_fpr(score, label, th)
+        else:
+            raise 'error'
+
+        return acc
 
 
 

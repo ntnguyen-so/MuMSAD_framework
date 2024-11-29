@@ -1,20 +1,9 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/model
-# @file : sit
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 
-from models.embedding.patch_embed import EmbeddingStem
-from models.blocks.transformer_encoder import TransformerEncoder
-from models.layers.output_layer import OutputLayer
+from model_selectors.embedding.patch_embed import EmbeddingStem
+from model_selectors.blocks.transformer_encoder import TransformerEncoder
+from model_selectors.layers.output_layer import OutputLayer
 
 
 class SignalTransformer(nn.Module):

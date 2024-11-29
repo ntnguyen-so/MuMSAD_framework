@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: utils
-# @file : data_loader
-#
-########################################################################
-
 import os, glob
 
 import numpy as np
@@ -73,23 +62,9 @@ class DataLoader:
         
         for dataset_name in self.dataset_names:
             for fname in glob.glob(os.path.join(self.data_path, dataset_name, '*.out')):
-                #print(fname)
                 df = pd.read_csv(fname, header=None)
                 mean_list.append(df.mean().tolist()[:-1])
                 std_list.append(df.std().tolist()[:-1])
-
-                # if not ret_max_vals:
-                    # ret_max_vals = max_vals
-                # if not ret_min_vals:
-                    # ret_min_vals = min_vals
-
-                # for i in range(len(max_vals)):
-                    # if max_vals[i] > ret_max_vals[i]:
-                        # ret_max_vals[i] = max_vals[i]
-
-                # for i in range(len(min_vals)):
-                    # if min_vals[i] < ret_min_vals[i]:
-                        # ret_min_vals[i] = min_vals[i]
                     
         self.ret_mean_vals = np.array(mean_list).mean(axis=0)
         self.ret_std_vals = np.array(std_list).std(axis=0)
@@ -107,9 +82,7 @@ class DataLoader:
         y = []
         fnames = []
         
-        print('before calc_data_characteristics')
         self.calc_data_characteristics_std()
-        print('after calc_data_characteristics')
         print(self.ret_mean_vals, self.ret_std_vals)
 
 
@@ -125,18 +98,14 @@ class DataLoader:
                 if curr_data.ndim != 2:
                     raise ValueError('did not expect this shape of data: \'{}\', {}'.format(fname, curr_data.shape))
 
-                # Skip files with no anomalies
-                if True:# not np.all(curr_data[0, 1] == curr_data[:, 1]):
-                    curr_data[:, :-1] = (curr_data[:, :-1] - self.ret_mean_vals) / (self.ret_std_vals)
-                    pca = PCA(n_components=1)#, kernel='rbf')
-                    #x.append(pca.fit_transform(curr_data[:, :-1]))
-                    x.append(np.sum(curr_data[:, :-1], axis=1))
-                    #print(pca.explained_variance_ratio_)
-                    #x.append(curr_data[:, :-1])
-                    y.append(curr_data[:, -1])
-                    # Remove path from file name, keep dataset, time series name
-                    fname = '/'.join(fname.split('/')[-2:])        
-                    fnames.append(fname.replace(self.data_path, ''))
+                curr_data[:, :-1] = (curr_data[:, :-1] - self.ret_mean_vals) / (self.ret_std_vals)
+                pca = PCA(n_components=1)
+                x.append(np.sum(curr_data[:, :-1], axis=1))
+                y.append(curr_data[:, -1])
+                
+                # Remove path from file name, keep dataset, time series name
+                fname = '/'.join(fname.split('/')[-2:])        
+                fnames.append(fname.replace(self.data_path, ''))
                     
         return x, y, fnames
 

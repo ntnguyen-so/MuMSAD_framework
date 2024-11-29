@@ -1,15 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: root
-# @file : create_windows_dataset
-#
-########################################################################
-
-
 import sys
 import os
 from tqdm import tqdm
@@ -35,6 +23,7 @@ def create_tmp_dataset(
     metric_path,
     window_size,
     metric, 
+    data_normalization
 ):
     """Generates a new dataset from the given dataset. The time series
     in the generated dataset have been divided in windows.
@@ -83,17 +72,8 @@ def create_tmp_dataset(
     metrics_data = metrics_data[detector_names]
 
     # Split timeseries and compute labels
-    ts_list, labels, fnames = split_and_compute_labels(x, metrics_data, window_size, fnames)
+    ts_list, labels, fnames = split_and_compute_labels(x, metrics_data, window_size, fnames, data_normalization)
     
-    # Uncomment to check the results
-    # fig, axs = plt.subplots(2, 1, sharex=True)
-    # x_new = np.concatenate(ts_list[3])
-    # print(np.mean(x_new))
-    # print(np.std(x_new))
-    # axs[0].plot(x_new)
-    # axs[1].plot(x[3])
-    # plt.show()
-
     # Create subfolder for each dataset
     for dataset in datasets:
         dir_path = os.path.join(save_dir, name, dataset)
@@ -107,20 +87,12 @@ def create_tmp_dataset(
         fname_split = fname.split('/')
         dataset_name = fname_split[-2]
         ts_name = fname_split[-1]
-        # new_names = [ts_name + '.{}'.format(i) for i in range(len(ts))]
         
         np.save(os.path.join(save_dir, name, dataset_name, ts_name), ts)
         np.save(os.path.join(save_dir, name, dataset_name, ts_name + '_label'), label[:, np.newaxis])
-        
-        # data = np.concatenate((label[:, np.newaxis], ts.reshape((ts.shape[0], -1))), axis=1)
-        # col_names = ['label']
-        # col_names += ["val_{}".format(i) for i in range(data.shape[1]-1)]
-        
-        # df = pd.DataFrame(data, index=new_names, columns=col_names)
-        # df.to_csv(os.path.join(save_dir, name, dataset_name, ts_name + '.csv'))
 
 
-def split_and_compute_labels(x, metrics_data, window_size, fnames):
+def split_and_compute_labels(x, metrics_data, window_size, fnames, data_normalization=True):
     '''Splits the timeseries, computes the labels and returns 
     the segmented timeseries and the new labels.
 
@@ -147,20 +119,14 @@ def split_and_compute_labels(x, metrics_data, window_size, fnames):
     #print(len(x), len(metrics_data))
     x = [x[old_indices.index(new_i)] for new_i in metrics_data.index.values.tolist()]
     fnames = [fnames[old_indices.index(new_i)] for new_i in metrics_data.index.values.tolist()]
-    #print(metrics_data.index.values.tolist())
-    #print([old_indices.index(new_i) for new_i in metrics_data.index.values.tolist()])
 
     for ts_fnames, metric_label in tqdm(zip(fnames, metrics_data.idxmax(axis=1)), total=len(x), desc="Create dataset"):
-        print(ts_fnames)
-        ts = pd.read_csv('data/OBSEA/data/' + ts_fnames, header=None)
+        ts = pd.read_csv(data_path + ts_fnames, header=None)
         ts = ts.iloc[:, :-1].values
-        # print('ts.shape', ts.shape)
-        # Z-normalization (windows with a single value go to 0)
-        # ts = z_normalization(ts, decimals=7)
 
         # Split time series into windows
-        ts_split = split_ts(ts, window_size)
-        # print('ts_split', ts_split.shape)
+        ts_split = split_ts(ts, window_size, data_normalization)
+        
         # Save everything to lists
         ts_list.append(ts_split)
         labels.append(np.ones(len(ts_split)) * detector_names.index(metric_label))
@@ -184,7 +150,7 @@ def z_normalization(ts, decimals=5):
 
     return ts
 
-def split_ts(data, window_size):
+def split_ts(data, window_size, data_normalization=True):
     '''Split a timeserie into windows according to window_size.
     If the timeserie can not be divided exactly by the window_size
     then the first window will overlap the second.
@@ -197,11 +163,9 @@ def split_ts(data, window_size):
     # Compute the modulo
     modulo = data.shape[0] % window_size
     
-    np_mean = np.array([37.79987549, 4.92507308, 18.03925078])
-    np_std = np.array([0.14562043, 0.03604426, 0.30548436])
-
-    data = (data - np_mean) / (np_std)
-    print(np.mean(data, axis=0), np.std(data, axis=0))
+    # Normalize the data, if indicated
+    if data_normalization:
+        data = (data - data_stat_mean) / data_stat_std
 
 
     # Compute the number of windows
@@ -226,12 +190,13 @@ if __name__ == "__main__":
         epilog='Be careful where you save the generated dataset'
     )
 
-    parser.add_argument('-n', '--name', type=str, help='path to save the dataset', default="TSB")
+    parser.add_argument('-n', '--name', type=str, help='path to save the dataset', default="")
     parser.add_argument('-s', '--save_dir', type=str, help='path to save the dataset', required=True)
     parser.add_argument('-p', '--path', type=str, help='path of the dataset to divide', required=True)
-    parser.add_argument('-mp', '--metric_path', type=str, help='path to the metrics of the dataset given', default=TSB_metrics_path)
+    parser.add_argument('-mp', '--metric_path', type=str, help='path to the metrics of the dataset given', default=metrics_path)
     parser.add_argument('-w', '--window_size', type=str, help='window size to segment the timeseries to', required=True)
     parser.add_argument('-m', '--metric', type=str, help='metric to use to produce the labels', default='AUC_PR')
+    parser.add_argument('-d', '--data_normalization', action='store_true', help='whether to normalize the data or not')
 
     args = parser.parse_args()
 
@@ -246,6 +211,7 @@ if __name__ == "__main__":
                 metric_path=args.metric_path,
                 window_size=size, 
                 metric=args.metric,
+                data_normalization=args.data_normalization
             )
     else:        
         create_tmp_dataset(
@@ -255,6 +221,7 @@ if __name__ == "__main__":
             metric_path=args.metric_path,
             window_size=int(args.window_size), 
             metric=args.metric,
+            data_normalization=args.data_normalization
         )
 
 

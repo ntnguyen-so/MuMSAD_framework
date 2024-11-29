@@ -1,20 +1,9 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/blocks
-# @file : transformer_encoder
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 
-from models.layers.attention import Attention
-from models.layers.feed_forward import FeedForward
-from models.layers.prenorm import PreNorm
+from model_selectors.layers.attention import Attention
+from model_selectors.layers.feed_forward import FeedForward
+from model_selectors.layers.prenorm import PreNorm
 
 
 class TransformerEncoder(nn.Module):

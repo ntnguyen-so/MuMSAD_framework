@@ -1,15 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos & Paul Boniol
-# @source : https://github.com/okrasolar/pytorch-timeseries/blob/master/
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/layers
-# @file : conv1d_same_padding
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 from torch.nn import functional as F

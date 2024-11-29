@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : Ensemble model anomaly detection
-# @component: models/layers
-# @file : feed_forward
-#
-########################################################################
-
 import torch
 import torch.nn as nn
 
