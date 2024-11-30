@@ -7,7 +7,7 @@ import copy
 class Avg_ens:
 	'''Theoretical model that naively averages the scores of all detectors'''
 	
-	def fit(self, labels, scores, metrics, n_jobs=1):
+	def fit(self, labels, scores, metrics, cause_labels=None, n_jobs=1):
 		'''Computes all metrics for the Average Ensemble model. If both VUS_ROC
 		and VUS_PR are requested a trick is done to compute them in parallel
 		and save time.
@@ -46,6 +46,7 @@ class Avg_ens:
 				for i, m in enumerate(['VUS_ROC', 'VUS_PR']):
 					metric_values_dict[m] = metric_values[:, i]
 			else:
-				metric_values_dict[curr_metric] = scoresloader.compute_metric(labels, avg_ens_scores, metric=curr_metric, n_jobs=n_jobs)
+				metric_values_dict[curr_metric] = scoresloader.compute_metric(labels, avg_ens_scores, metric=curr_metric, 
+																  n_jobs=n_jobs, cause_labels=cause_labels)
 
 		return metric_values_dict
