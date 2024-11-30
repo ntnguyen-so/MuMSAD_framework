@@ -4,6 +4,7 @@ import math
 import itertools, operator
 import time
 from sklearn.metrics import precision_recall_curve, auc
+import pandas as pd
 # import matplotlib.pyplot as plt
 
 
@@ -492,6 +493,8 @@ class metricor:
             raise 'error'
 
         return acc
+    
+
 
 
 
@@ -507,3 +510,111 @@ def generate_curve(label,score,slidingWindow):
     tpr_3d, fpr_3d, prec_3d, window_3d, avg_auc_3d, avg_ap_3d = metricor().RangeAUC_volume(labels_original=label, score=score, windowSize=1*slidingWindow)
 
     return avg_auc_3d, avg_ap_3d
+
+def __top_k_hit_percentage(true_values, predicted_values, k):
+    true_values = [int(value) for value in true_values]
+    predicted_values = [int(value) for value in predicted_values[:k]]
+    
+    top_k_predictions = set(predicted_values)
+    hits = sum(1 for value in true_values if value in top_k_predictions)
+    
+    return hits / k if k else 0
+
+def calc_interpretability(score, cause_label):
+    cause_label =  pd.DataFrame(cause_label)
+    
+    label_anomalous_columns = cause_label.iloc[:, :-1] 
+    label_interpretability = cause_label.iloc[:, -1]
+    ano_degree = score
+    ano_degree = pd.DataFrame(ano_degree)
+    # print(ano_degree.shape, cause_label.shape)
+    if len(ano_degree) < len(label_interpretability):     
+        label_interpretability = label_interpretability[-len(ano_degree):]
+    else:
+        ano_degree = ano_degree[-len(label_interpretability):]
+
+    hit_total = []
+    # Precompute the length of label_interpretability
+    n = len(label_interpretability)
+
+    # Iterate once over the label_interpretability array using .iloc for safe positional indexing
+    for i in range(n):
+        if label_interpretability.iloc[i] > 0:  # Use .iloc here
+            # Directly filter the anomalous columns and prediction columns
+            ano_col = label_anomalous_columns.iloc[i].to_list()  # Convert to list only once
+            label_col_indices = [index for index, is_ano_col in enumerate(ano_col) if is_ano_col == 1]
+
+            # Get the top predictions for the current row up to the number of anomalies
+            pred_col_index = ano_degree.iloc[i].to_list()[:len(label_col_indices)]
+
+            # Append the hit percentage for this row
+            if label_col_indices:  # Ensure non-empty to avoid unnecessary computation
+                hit_total.append(__top_k_hit_percentage(label_col_indices, pred_col_index, len(label_col_indices)))
+
+    # Calculate the interpretability accuracy based on the collected hit_total
+    interpretability_acc = sum(hit_total) / len(hit_total) if hit_total else 1
+    
+    return interpretability_acc
+
+
+def calc_auc_pr(score, label):
+    precision, recall, _ = precision_recall_curve(label, score)
+    auc_pr = auc(recall, precision)
+    return auc_pr
+    
+
+def calc_reverse_fpr(score, label, th):
+    scores = list()
+    for th in np.linspace(0, 1, 1000):    
+        y_pred = np.array(score)
+        y_true = np.array(label)
+        # Convert predicted probabilities to binary predictions based on the threshold
+        y_pred_binary = (y_pred >= th).astype(int)
+    
+        # Calculate True Positives (TP) and False Negatives (FN)
+        TP = np.sum((y_true == 1) & (y_pred_binary == 1))
+        TN = np.sum((y_true == 0) & (y_pred_binary == 0))
+        FN = np.sum((y_true == 1) & (y_pred_binary == 0))
+        FP = np.sum((y_true == 0) & (y_pred_binary == 1))
+    
+        # Calculate False Negative Rate (FNR)
+        fpr = FP / (FP + TN)
+
+        scores.append(1-fpr)
+
+    return np.mean(np.array(scores))
+    
+
+def calc_tpr(score, label, th):
+    scores = list()
+    
+    for th in np.linspace(0, 1, 1000):
+        y_pred = np.array(score)
+        y_true = np.array(label)
+        
+        # Convert predicted probabilities to binary predictions based on the threshold
+        y_pred_binary = (y_pred >= th).astype(int)
+    
+        # Calculate True Positives (TP) and False Negatives (FN)
+        TP = np.sum((y_true == 1) & (y_pred_binary == 1))
+        TN = np.sum((y_true == 0) & (y_pred_binary == 0))
+        FN = np.sum((y_true == 1) & (y_pred_binary == 0))
+        FP = np.sum((y_true == 0) & (y_pred_binary == 1))
+    
+        # Calculate False Negative Rate (FNR)
+        tpr = TP / (TP + FN)
+
+        scores.append(tpr)
+    return np.mean(np.array(scores))
+    
+def calc_ad_acc(score, label, th):
+    if sum(label) > 0 and sum(label) < len(label):
+        acc = calc_auc_pr(score, label)
+    elif sum(label) == len(label):
+        acc = calc_tpr(score, label, th)
+    elif sum(label) == 0:
+        acc = calc_reverse_fpr(score, label, th)
+    else:
+        raise 'error'
+
+    return acc

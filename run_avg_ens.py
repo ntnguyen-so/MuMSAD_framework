@@ -1,16 +1,4 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: root
-# @file : run_avg_ens
-#
-########################################################################
-
-
-from models.model.avg_ens import Avg_ens
+from model_selectors.model.avg_ens import Avg_ens
 
 from utils.scores_loader import ScoresLoader
 from utils.data_loader import DataLoader
@@ -29,29 +17,34 @@ def create_avg_ens(n_jobs=1):
     '''
 
     # Load metrics' names
-    metricsloader = MetricsLoader(OBSEA_metrics_path)
+    metricsloader = MetricsLoader(metrics_path)
     metrics = metricsloader.get_names()
 
     # Load data
-    dataloader = DataLoader(OBSEA_data_path)
+    dataloader = DataLoader(data_path, rootcause_data_path)
     datasets = dataloader.get_dataset_names()
-    x, y, fnames = dataloader.load(datasets)
+    x, y, fnames, y_column = dataloader.load(datasets)
 
     # Load scores
-    scoresloader = ScoresLoader(OBSEA_scores_path)
+    scoresloader = ScoresLoader(scores_path)
     scores, idx_failed = scoresloader.load(fnames)
-    #print(scores)
 
     # Remove failed idxs
     if len(idx_failed) > 0:
         for idx in sorted(idx_failed, reverse=True):
             del x[idx]
             del y[idx]
+            del y_column[idx]
             del fnames[idx]
 
     # Create Avg_ens
     avg_ens = Avg_ens()
-    metric_values = avg_ens.fit(y, scores, metrics, n_jobs=n_jobs)
+    metric_values = avg_ens.fit(y, scores, metrics, cause_labels=y_column, n_jobs=n_jobs)
+    # Remove failed idxs
+    if len(idx_failed) > 0:
+        for idx in sorted(idx_failed, reverse=True):
+            del fnames[idx]
+            
     for metric in metrics:
         # Write metric values for avg_ens
         metricsloader.write(metric_values[metric], fnames, 'AVG_ENS', metric)

@@ -1,21 +1,10 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: utils
-# @file : scores_loader
-#
-########################################################################
-
 import multiprocessing
 import multiprocessing.pool as mpp
 
 from utils.metrics_loader import MetricsLoader
 from utils.data_loader import DataLoader
 # from utils.config import *
-from utils.metrics import generate_curve
+from utils.metrics import generate_curve, calc_interpretability, calc_ad_acc
 
 from numba import jit
 import os, glob
@@ -32,6 +21,10 @@ from sklearn import metrics
 import pandas as pd
 from sklearn.metrics import average_precision_score, precision_recall_curve
 import copy
+
+
+    
+
 
 def safe_float_conversion(arr):
     try:
@@ -64,7 +57,7 @@ class ScoresLoader:
         return detectors
         
     def calc_scores_stat(self, detector_scores_paths):
-        self.max_scores, self.min_scores = dict(), dict()
+        self.max_scores, self.min_scores, self.median_scores = dict(), dict(), dict()
         detectors = self.get_detector_names()
         
         for detector in tqdm(detectors, desc='Calculating statistics of scores'):
@@ -76,8 +69,11 @@ class ScoresLoader:
                 score = list(score)
                 total_scores.extend(score)
                 
-            self.max_scores[detector] = max(total_scores)
-            self.min_scores[detector] = min(total_scores)
+            total_scores = np.vstack(total_scores)
+            self.max_scores[detector] = np.nanmax(total_scores, axis=0)
+            self.min_scores[detector] = np.nanmin(total_scores, axis=0)
+            self.median_scores[detector] = np.nanmedian(total_scores, axis=0)
+            # print(self.max_scores)
 
     def load(self, file_names):
         '''
@@ -111,6 +107,7 @@ class ScoresLoader:
                     score = pd.read_csv(path).to_numpy()
                     score = np.vectorize(safe_float_conversion)(score)
                     detector_name = path.split('/')[-3]
+                    score = np.where(np.isnan(score), self.median_scores[detector_name], score)                   
                     score = (score - self.min_scores[detector_name]) / (self.max_scores[detector_name] - self.min_scores[detector_name])
                     data.append(score) 
                     # print('Loaded scores from', path)
@@ -165,7 +162,7 @@ class ScoresLoader:
 # -----------------------------------------------------
     
     #@jit
-    def compute_metric(self, labels, scores, metric, verbose=1, n_jobs=1):
+    def compute_metric(self, labels, scores, metric, verbose=1, n_jobs=1, cause_labels=None):
         '''Computes desired metric for all labels and scores pairs.
 
         :param labels: list of arrays each representing the labels of a timeseries/sample
@@ -189,21 +186,21 @@ class ScoresLoader:
             pool = multiprocessing.Pool(n_jobs)
             
             results = []
-            for label, score in zip(labels, scores):
-                result = self.compute_single_sample(label, score, metric)
+            for label, score, y_label in zip(labels, scores, cause_labels):
+                result = self.compute_single_sample(label, score, metric, cause_label=y_label)
                 #for result in  tqdm(pool.istarmap(self.compute_single_sample, args), total=len(args)):
                 results.append(result)
 
             results = np.asarray([x.tolist() for x in results])
         else:
-            for i, x, y in tqdm(zip(range(n_files), labels, scores), total=n_files, desc='Compute {}'.format(metric), disable=not verbose):
-                results.append(self.compute_single_sample(x, y, metric))
+            for i, x, y, y_label in tqdm(zip(range(n_files), labels, scores, cause_labels), total=n_files, desc='Compute {}'.format(metric), disable=not verbose):
+                results.append(self.compute_single_sample(x, y, metric, cause_label=y_label))
             results = np.asarray(results)
 
         return results
 
 
-    def compute_single_sample(self,    label, score, metric):
+    def compute_single_sample(self,    label, score, metric, cause_label=None):
         '''Compute a metric for a single sample and multiple scores.
 
         :param label: 1D array of 0, 1 labels, (len_ts)
@@ -222,7 +219,7 @@ class ScoresLoader:
             raise ValueError("label has more dimensions than expected.")
 
         tick = time.process_time()
-        result = np.apply_along_axis(self.compute_single_metric, 0, score, label, metric)
+        result = np.apply_along_axis(self.compute_single_metric, 0, score, label, metric, cause_label=cause_label)
         
         '''
         # Evaluate the computed metrics
@@ -266,7 +263,7 @@ class ScoresLoader:
         
         return max_len if max_len > 10 else 10
 
-    def compute_single_metric(self, score, label, metric):
+    def compute_single_metric(self, score, label, metric, cause_label=None):
         '''Compute a metric for a single sample and score.
 
         :param label: 1D array of 0, 1 labels
@@ -308,8 +305,10 @@ class ScoresLoader:
             fnr = FN / (FN + TP) if (FN + TP) > 0 else 0
 
             result = best_f1 - fnr if best_f1 - fnr > 0 else 0
-        elif metric == 'pr_auc':
-            result = calc_acc(score, label, 0) 
+        elif metric == 'ad_acc':
+            result = calc_ad_acc(score, label, 0) 
+        elif metric == 'interpretability':
+            result = calc_interpretability(score, cause_label)
         elif np.all(0 == label):
             fpr, tpr, thresholds = metrics.roc_curve(label, score)
             thresholds[0] = 1

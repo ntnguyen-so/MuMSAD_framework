@@ -14,8 +14,9 @@ class DataLoader:
     should be given.
     """
 
-    def __init__(self, data_path):
+    def __init__(self, data_path, rootcause_data_path=None):
         self.data_path = data_path
+        self.rootcause_data_path = rootcause_data_path
 
 
     def get_dataset_names(self):
@@ -81,6 +82,7 @@ class DataLoader:
         x = []
         y = []
         fnames = []
+        y_column = []
         
         self.calc_data_characteristics_std()
         print(self.ret_mean_vals, self.ret_std_vals)
@@ -99,15 +101,21 @@ class DataLoader:
                     raise ValueError('did not expect this shape of data: \'{}\', {}'.format(fname, curr_data.shape))
 
                 curr_data[:, :-1] = (curr_data[:, :-1] - self.ret_mean_vals) / (self.ret_std_vals)
-                pca = PCA(n_components=1)
                 x.append(np.sum(curr_data[:, :-1], axis=1))
                 y.append(curr_data[:, -1])
                 
                 # Remove path from file name, keep dataset, time series name
                 fname = '/'.join(fname.split('/')[-2:])        
                 fnames.append(fname.replace(self.data_path, ''))
+
+            # for root cause data
+            for fname in glob.glob(os.path.join(self.rootcause_data_path, name, '*.out')):
+                # print(fname)
+                curr_data = pd.read_csv(fname, header=None).to_numpy()
+                
+                y_column.append(curr_data[:, :])
                     
-        return x, y, fnames
+        return x, y, fnames, y_column
 
 
     def load_df(self, dataset):
