@@ -1,14 +1,3 @@
-########################################################################
-#
-# @author : Emmanouil Sylligardos
-# @when : Winter Semester 2022/2023
-# @where : LIPADE internship Paris
-# @title : MSAD (Model Selection Anomaly Detection)
-# @component: utils
-# @file : timeseries_dataset
-#
-########################################################################
-
 import os
 from tqdm import tqdm
 
@@ -140,34 +129,6 @@ def read_files(data_path):
 
     return fnames
 
-def amplitude_scaling(sample, scale_range=(0.8, 1.2)):
-    scale_factor = np.random.uniform(*scale_range)
-    scaled_sample = sample * scale_factor
-    return scaled_sample
-
-def time_warping(sample, warp_factor_range=(0.9, 1.1)):
-    warp_factor = np.random.uniform(*warp_factor_range)
-    num_points = sample.shape[0]
-    warped_indices = np.arange(0, num_points, warp_factor)
-    warped_sample = np.interp(np.arange(num_points), warped_indices, sample)
-    return warped_sample
-
-def noise_injection(sample, noise_level=0.3):
-    noise = np.random.normal(loc=0, scale=noise_level, size=sample.shape)
-    noisy_sample = sample + noise
-    return noisy_sample
-
-def z_normalization(ts, decimals=5):
-    ts = (ts - np.mean(ts)) / np.std(ts)
-    ts = np.around(ts, decimals=decimals)
-
-    # Test normalization
-    assert(
-        np.around(np.mean(ts), decimals=3) == 0 and np.around(np.std(ts) - 1, decimals=3) == 0
-    ), "After normalization it should: mean == 0 and std == 1"
-
-    return ts
-
 class TimeseriesDataset(Dataset):
     def __init__(self, data_path, fnames, verbose=True, transform=False):
         self.data_path = data_path
@@ -183,56 +144,55 @@ class TimeseriesDataset(Dataset):
         # print('DATA TO TRAIN', self.fnames)
         # Read datasets
         for fname in tqdm(self.fnames, disable=not verbose, desc="Loading dataset"):
-            fname_data = copy.deepcopy(fname)
-            fname_data = fname_data.replace('.csv', '.npy')
-            
-            fname_label = copy.deepcopy(fname)
-            fname_label = fname_label.replace('.csv', '_label.npy')
-            # print(os.path.join(self.data_path, fname))
-            # data = pd.read_csv(os.path.join(self.data_path, fname), index_col=0)
-            # data = np.load(os.path.join(self.data_path, fname))
-            # dataset = fname.split('/')[0]
-            # curr_idxs = list(data.index)
-            # curr_idxs = [os.path.join(dataset, x) for x in curr_idxs]
-
-            
-            # self.indexes.extend(curr_idxs)    
-            
-            label = np.load(os.path.join(self.data_path, fname_label)).ravel()
-            self.labels.extend(label.tolist())
-            
-            data_data = np.load(os.path.join(self.data_path, fname_data))
-            median_value = np.nanmedian(data_data)
-            data_data[np.isnan(data_data)] = median_value
-            
-            # print(data_data.shape, fname_data, fname_label, fname)
-            data_data = np.swapaxes(data_data, 1, 2)
-            #data_data = z_normalization(data_data, 7)
-            self.samples.append(data_data)
+            if num_dimensions == 1:
+                self.__load_data_uni(fname)
+            else:
+                self.__load_data_multi(fname)
         
         # Concatenate samples and labels
         self.labels = np.asarray(self.labels)
         self.samples = np.concatenate(self.samples, axis=0)
 
         # Add channels dimension
-        # self.samples = self.samples[:, np.newaxis, :]
+        if num_dimensions == 1:
+            self.samples = self.samples[:, np.newaxis, :]
+
+    def __load_data_uni(self, fname):
+        data = pd.read_csv(os.path.join(self.data_path, fname), index_col=0)
+        dataset = fname.split('/')[0]
+        curr_idxs = list(data.index)
+        curr_idxs = [os.path.join(dataset, x) for x in curr_idxs]
+
+        self.indexes.extend(curr_idxs)	
+        self.labels.extend(data['label'].tolist())
+        self.samples.append(data.iloc[:, 1:].to_numpy())
+
+    def __load_data_multi(self, fname):
+        fname_data = copy.deepcopy(fname)
+        fname_data = fname_data.replace('.csv', '.npy')
+        
+        fname_label = copy.deepcopy(fname)
+        fname_label = fname_label.replace('.csv', '_label.npy')
+                
+        label = np.load(os.path.join(self.data_path, fname_label)).ravel()
+        self.labels.extend(label.tolist())
+        
+        data_data = np.load(os.path.join(self.data_path, fname_data))
+        median_value = np.nanmedian(data_data)
+        data_data[np.isnan(data_data)] = median_value
+        
+        data_data = np.swapaxes(data_data, 1, 2)
+        self.samples.append(data_data)
         
     def __len__(self):
         return self.labels.size
 
     def __getitem__(self, idx):
         sample = copy.copy(self.samples[idx])
-        if self.transform:
-            #sample = time_warping(sample)
-            sample = amplitude_scaling(sample)
-            sample = noise_injection(sample)
         
         return sample, self.labels[idx]
 
     def __getallsamples__(self):
-        if self.transform:
-            for i in range(len(self.samples)):
-                self.samples[i] = noise_injection(self.samples[i])
         return self.samples
 
     def __getalllabels__(self):

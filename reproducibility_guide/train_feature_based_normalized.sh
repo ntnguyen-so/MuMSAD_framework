@@ -3,7 +3,7 @@
 # Commands to train all feature based models for all sizes, save the trained models, and evaluate them and save their results
 
 # Nearest Neighbors
-python3.8 train_feature_based.py --path=data/ood_example/normalized/OBSEA_4/TSFRESH_OBSEA_4_catch22.npy --classifier=knn --file=reproducibility_guide/train_val_split.csv --path_save=results/weights_feature/weights_catch22_normalized/ #--eval-true
+python3.8 train_feature_based.py --path=data//OBSEA_4/TSFRESH_OBSEA_4_catch22.npy --classifier=knn --file=reproducibility_guide/train_val_split.csv --path_save=results/weights_feature/weights_catch22_normalized/ #--eval-true
 python3.8 train_feature_based.py --path=data/ood_example/normalized/OBSEA_8/TSFRESH_OBSEA_8_catch22.npy --classifier=knn --file=reproducibility_guide/train_val_split.csv --path_save=results/weights_feature/weights_catch22_normalized/ #--eval-true
 python3.8 train_feature_based.py --path=data/ood_example/normalized/OBSEA_16/TSFRESH_OBSEA_16_catch22.npy --classifier=knn --file=reproducibility_guide/train_val_split.csv --path_save=results/weights_feature/weights_catch22_normalized/ #--eval-true
 python3.8 train_feature_based.py --path=data/ood_example/normalized/OBSEA_32/TSFRESH_OBSEA_32_catch22.npy --classifier=knn --file=reproducibility_guide/train_val_split.csv --path_save=results/weights_feature/weights_catch22_normalized/ #--eval-true
