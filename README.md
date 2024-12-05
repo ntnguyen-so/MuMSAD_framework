@@ -40,7 +40,7 @@ git clone https://github.com/ntnguyen-so/MuMSAD_framework.git
 cd MuMSAD_framework/
 ```
 
-**Step 2:** Create and activate a `conda` environment named `MSAD`.
+**Step 2:** Create and activate a `conda` environment named `MuMMSAD`.
 
 ```bash
 conda env create --file environment.yml
