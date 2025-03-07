@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/headline.PNG" style="width: 25%;"/>
+<img src="./r/assets/headline.PNG" style="width: 25%;"/>
 </p>
 
 <h1 align="center">
@@ -8,7 +8,7 @@
 MuMSAD framework can be utilized for automatically selecting of ten interpretable multivariate anomaly detectors, with the proposed pipeline being illustrated below.
 
 <div align="center">
-  <img src="./assets/pipeline.PNG" alt="Pipeline" style="width: 70%;">
+  <img src="./r/assets/pipeline.PNG" alt="Pipeline" style="width: 70%;">
 </div>
 
 
@@ -17,7 +17,7 @@ The framework can be used in a wide range of applications, especially in root ca
 - Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborators.
 
 <div align="center">
-  <img src="./assets/motivation.PNG" alt="Motivation" style="width: 50%;">
+  <img src="./r/assets/motivation.PNG" alt="Motivation" style="width: 50%;">
 </div>
 
 MuMSAD is an extension of [MSAD](https://github.com/boniolp/MSAD), which is orignally designed for automatic selection of univariate anomaly detectors. MuMSAD is fully compatible to features supported in the original framework.
