@@ -14,13 +14,12 @@ MuMSAD framework can be utilized for automatically selecting of ten interpretabl
 
 The framework can be used in a wide range of applications, especially in root cause analysis. In our work, we have demonstrated the usefulness and practicability of MuMSAD in two real-world applications, requested by many of industrial and research collaborators.
 - Automatic multi-parameter marine data quality control. The figure below demonstrates the overview idea of the application.
-- Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborator.
+- Automatic identification of malfunctioning sensors in Remotely Operated Vehicles, which is requested by one of our industrial collaborators.
 
 <div align="center">
   <img src="./assets/motivation.PNG" alt="Motivation" style="width: 50%;">
 </div>
 
-Our work is under review at The IEEE International Conference on Data Engineering (ICDE) 2025 Industry and Applications Track.
 MuMSAD is an extension of [MSAD](https://github.com/boniolp/MSAD), which is orignally designed for automatic selection of univariate anomaly detectors. MuMSAD is fully compatible to features supported in the original framework.
 
 ## Installation
